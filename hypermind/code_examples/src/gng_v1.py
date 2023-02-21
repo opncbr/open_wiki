@@ -1,5 +1,5 @@
 from src.dynamic_graph import DynamicGraph
-from torch import pow, topk
+from torch import pow, topk, unique
 from torch_scatter import scatter_mean
 
 # The default growing neural gas model as presented in section 2 of http://www.booru.net/download/MasterThesisProj.pdf
@@ -28,7 +28,7 @@ class GNG_v1(DynamicGraph):
 
     def _scatter_mean_errors(self, winner_errors, winner_indices):
         mean_winner_error = scatter_mean(winner_errors, winner_indices)
-        unique_winner_indices = torch.unique(winner_indices)
+        unique_winner_indices = unique(winner_indices)
         mean_winner_error = mean_winner_error[unique_winner_indices]
         return unique_winner_indices, mean_winner_error
     
