@@ -14,13 +14,13 @@ class DynamicGraph(Module):
                  initial_node_age: Optional[float] = 0.
                 ):
         super(DynamicGraph, self).__init__()
-        self.w = Parameter(Tensor(node_num, input_length))
+        self.weight = Parameter(Tensor(node_num, input_length), requires_grad = False)
         self.node_errors = ones(node_num, dtype = float64, requires_grad = False) * initial_node_errors
         self.edge_ages = ones(node_num, dtype = float64, requires_grad = False) * initial_node_age
         self.edges = tensor([])
         
     def get_nodes_num(self):
-        return self.w.shape[0]
+        return self.weight.shape[0]
     
     def get_edges(self):
         U = self.edges[0,:]
@@ -35,7 +35,7 @@ class DynamicGraph(Module):
         assert type(new_tensor) == Tensor, "invalid type for new_keys"
         if len(new_tensor.size()) == 1:
             new_tensor = new_tensor.unsqueeze(0)
-        self.w = Parameter(data = cat((self.w, new_tensor), dim=0))
+        self.weight = Parameter(data = cat((self.weight, new_tensor), dim=0))
         if type(new_errors) == int:
             new_errors = ones(new_tensor.size(0)) * new_errors
         self.node_errors = cat((self.node_errors, new_errors), dim=0)
@@ -46,7 +46,7 @@ class DynamicGraph(Module):
                   ages: Union[Tensor, int], 
                   reduce_op: Optional[str] = 'mean'
                  ):
-        assert (U.max() <= len(self.w)-1) and (V.max() <= len(self.w)-1), "edge index exceeds node count"
+        assert (U.max() <= len(self.weight)-1) and (V.max() <= len(self.weight)-1), "edge index exceeds node count"
         new_e = sort(cat((U.unsqueeze(0),V.unsqueeze(0)), dim=0), dim=0).values
         if type(ages) == int:
             ages = ones(new_e.size(1)) * ages
@@ -83,8 +83,8 @@ class DynamicGraph(Module):
                     ):
         if type(node_indices) == list:
             node_indices = tensor(node_indices)
-        node_mask = (arange(self.w.size(0)).unsqueeze(1) == node_indices).sum(1) == 0
-        self.w = Parameter(self.w[node_mask,:])
+        node_mask = (arange(self.weight.size(0)).unsqueeze(1) == node_indices).sum(1) == 0
+        self.weight = Parameter(self.weight[node_mask,:])
         self.node_errors = self.node_errors[node_mask]
         if self.edges.shape[0] != 0:
             edge_mask = self.edges.unsqueeze(2) == node_indices
