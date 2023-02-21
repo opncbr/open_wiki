@@ -3,14 +3,14 @@ import torch
 
 def test_createGraphDefault():
     dg = DynamicGraph(input_length = 10)
-    assert list(dg.tensor.shape) == [2,10]
+    assert list(dg.w.shape) == [2,10]
     assert list(dg.node_errors.shape) == [2]
     assert dg.edges.sum() == 0
     assert dg.edge_ages.sum() == 0
     
 def test_createGraphCustom():
     dg = DynamicGraph(input_length = 10, node_num = 15)
-    assert list(dg.tensor.shape) == [15,10]
+    assert list(dg.w.shape) == [15,10]
     assert list(dg.node_errors.shape) == [15]
     assert dg.edges.sum() == 0
     assert dg.edge_ages.sum() == 0
@@ -20,7 +20,7 @@ def test_add_nodes():
     dg.add_nodes(new_tensor= torch.rand(4,10), 
                  new_errors = 0
                 )
-    assert list(dg.tensor.shape) == [11,10]
+    assert list(dg.w.shape) == [11,10]
     assert list(dg.node_errors.shape) == [11]
     assert dg.edges.sum() == 0
     assert dg.edge_ages.sum() == 0
@@ -30,16 +30,16 @@ def test_remove_nodes():
     dg = DynamicGraph(input_length = 10, node_num = node_num)
     indices2remove = [1,2,5]
     left_indices = sorted(list(set(list(range(node_num))) - set(indices2remove)))
-    cloned_tensor = dg.tensor[left_indices,:].detach().clone()
+    cloned_tensor = dg.w[left_indices,:].detach().clone()
     dg.remove_nodes(node_indices = torch.tensor(indices2remove))
-    assert torch.all(torch.eq(cloned_tensor, dg.tensor)).item()
+    assert torch.all(torch.eq(cloned_tensor, dg.w)).item()
     assert list(dg.node_errors.shape) == [4]
     assert dg.edges.sum() == 0
     assert dg.edge_ages.sum() == 0
     
 def test_empty_graph():
     dg = DynamicGraph(input_length = 10, node_num = 0)
-    assert list(dg.tensor.shape) == [0,10]
+    assert list(dg.w.shape) == [0,10]
 
 def test_add_then_remove_nodes():
     dg = DynamicGraph(input_length = 10, node_num = 0)
@@ -49,9 +49,9 @@ def test_add_then_remove_nodes():
                 )
     indices2remove = [1,2,5,6]
     left_indices = sorted(list(set(list(range(node_num))) - set(indices2remove)))
-    cloned_tensor = dg.tensor[left_indices,:].detach().clone()
+    cloned_tensor = dg.w[left_indices,:].detach().clone()
     dg.remove_nodes(node_indices = torch.tensor(indices2remove))
-    assert torch.all(torch.eq(cloned_tensor, dg.tensor)).item()
+    assert torch.all(torch.eq(cloned_tensor, dg.w)).item()
     assert list(dg.node_errors.shape) == [3]
     assert dg.edges.sum() == 0
     assert dg.edge_ages.sum() == 0
