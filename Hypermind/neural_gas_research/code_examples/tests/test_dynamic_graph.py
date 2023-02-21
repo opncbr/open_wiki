@@ -1,4 +1,4 @@
-from src.DynamicGraph import DynamicGraph
+from src.dynamic_graph import DynamicGraph
 import torch
 
 def test_createGraphDefault():

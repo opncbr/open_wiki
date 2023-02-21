@@ -1,4 +1,4 @@
-# GNGExperiments
+# Neural Gas Experiments
 
 ## Dependencies
 
